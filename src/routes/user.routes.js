@@ -38,7 +38,7 @@ router.route("/login").post(userLogin)
 
 router.route("/logout").post(verifyJWT, userLogout)
 router.route("/refresh-token").post(refreshAccessToken)
-outer.route("/details").get(verifyJWT, fetchUserDetails)
+router.route("/details").get(verifyJWT, fetchUserDetails)
 router.route("/detail/:userId").get(verifyJWT, fetchUserDetails)
 router.route("/update/passwrod").post(verifyJWT, changeCurrentPassword)
 router.route("/getCurrentUser").get(verifyJWT, getCurrentUser)
