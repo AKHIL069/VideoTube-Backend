@@ -101,8 +101,10 @@ const deleteComment = asyncHandler(async (req, res) => {
             throw new ApiError(404, "Cooment not found or already deleted");
         }
     
-        res.status(200)
+        return res
+        .status(200)
         .json(new ApiResponse(200, comment, "Comment deleted successfully"))
 })
+
 
 export { getVideoComments, addComment, updateComment, deleteComment }
