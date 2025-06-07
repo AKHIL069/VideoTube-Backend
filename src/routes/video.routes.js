@@ -1,5 +1,5 @@
 import { Router } from "express"
-import { getAllUserVideos, getAllVideos, getVideoById, publishVideos, togglePublishStatus, updateVideo } from "../controllers/video.controller.js"
+import { deleteVideo, getAllUserVideos, getAllVideos, getVideoById, publishVideos, togglePublishStatus, updateVideo } from "../controllers/video.controller.js"
 import { upload } from "../middlewares/multer.middleware.js"
 import { verifyJWT } from "../middlewares/auth.middleware.js"
 
@@ -23,6 +23,7 @@ router.route("/fetch/filters").get(verifyJWT, getAllVideos)
 router.route("/fetch/:userId").get(verifyJWT, getAllUserVideos)
 router.route("/fetch/byId/:videoId").get(verifyJWT, getVideoById)
 router.route("/update/:videoId").patch(verifyJWT, updateVideo)
+router.route("/delete/:videoId").delete(verifyJWT, deleteVideo)
 router.route("/flag/update/:videoId").patch(verifyJWT, togglePublishStatus)
 
 export default router
