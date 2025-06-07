@@ -1,9 +1,10 @@
 import { Router } from "express";
 import { verifyJWT } from "../middlewares/auth.middleware";
-import { addComment, deleteComment, updateComment } from "../controllers/comment.controller";
+import { addComment, deleteComment, getVideoComments, updateComment } from "../controllers/comment.controller";
 
 const router = Router()
 
+router.route("/fetch/:videoId").get(verifyJWT, getVideoComments)
 router.route("/add").post(verifyJWT, addComment)
 router.route("/update/:commentId").patch(verifyJWT, updateComment)
 router.route("/delete/:commentId").delete(verifyJWT, deleteComment)

@@ -3,6 +3,41 @@ import { ApiError } from "../utils/ApiError.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import { Comment } from "../models/comment.models.js";
 
+const getVideoComments = asyncHandler(async (req, res) => {
+    const { videoId } = req.params
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    if (!videoId || !mongoose.Types.ObjectId.isValid(videoId)) {
+        throw new ApiError(400, "Invalid or missing video ID");
+    }
+
+    const skip = (page - 1) * limit;
+
+    const comments = await Comment.find({ video: videoId })
+                                .sort({ createdAt: -1 }) // most recent first
+                                .skip(skip)
+                                .limit(limit)
+    
+    if (!comments) {
+       throw new ApiError(400, "No comments found with the video id") 
+    }
+
+    const totalComments = await Comment.countDocuments({ video: videoId });
+
+    commentDetails = {
+        currentPage: page,
+        totalPages: Math.ceil(totalComments / limit),
+        totalComments,
+        comments
+    }
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, commentDetails, "All comments fetched successfully"))
+
+})
+
 const addComment = asyncHandler(async (req, res) => {
     const { userId } = req.user?._id
     const { content, videoId } = req.body
@@ -70,4 +105,4 @@ const deleteComment = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, comment, "Comment deleted successfully"))
 })
 
-export { addComment, updateComment, deleteComment }
+export { getVideoComments, addComment, updateComment, deleteComment }

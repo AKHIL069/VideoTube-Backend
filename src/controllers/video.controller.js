@@ -26,7 +26,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
 
     const skip = (Number(page) - 1) * Number(limit);
 
-      const [videos, total] = await Promise.all([
+    const [videos, total] = await Promise.all([
         Video.find(filters)
         .sort(sortOptions)
         .skip(skip)
@@ -34,7 +34,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
         Video.countDocuments(filters)
      ]);
 
-     const  videoDetails = {
+    const  videoDetails = {
         total,
         page: Number(page),
         limit: Number(limit),
