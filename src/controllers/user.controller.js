@@ -43,8 +43,40 @@ const userRegisteration = asyncHandler( async(req, res) => {
     if (existedUser) {
         throw new ApiError(409, "User with this email or username already exists")
     }
+ 
+    // create user object - create entery in db
 
-    // console.log(req.files);
+    const user = await User.create({
+        fullName,
+        username: username.toLowerCase(),
+        email,
+        password
+    })
+
+    // remove password and refresh token field from response
+
+    const createdUser = await User.findById(user._id).select(
+        "-password -refreshToken"
+    )
+
+     // check for user creatation
+
+    if (!createdUser) {
+        throw new ApiError(500, "Something went wrong while registering user.")
+    }
+
+    // return res
+
+    return res.status(201).json(
+        new ApiResponse(201, createdUser, "User registered successfully")
+    )
+})
+
+
+const userProfileUpdate = asyncHandler(async (req, res) => {
+
+    const userId = req.user?._id
+
     // check for images, check for avatar
 
     const avatarLocalPath = req.files?.avatar[0]?.path;
@@ -69,33 +101,23 @@ const userRegisteration = asyncHandler( async(req, res) => {
         throw new ApiError(400, "Avatar image couldn't uploaded on cloudinary")
     }
 
-    // create user object - create entery in db
-
-    const user = await User.create({
-        fullName,
-        username: username.toLowerCase(),
-        email,
-        password,
+    const user = await User.findByIdAndUpdate(
+        userId,
+        {
         avatar: avatar.url,
         coverImage: coverImage?.url || "" 
-    })
-
-    // remove password and refresh token field from response
-
-    const createdUser = await User.findById(user._id).select(
-        "-password -refreshToken"
+        },
+        {new: true}
     )
 
-     // check for user creatation
-
-    if (!createdUser) {
-        throw new ApiError(500, "Something went wrong while registering user.")
+    if (!user) {
+        throw new ApiError(500, "Something went wrong while updating the user profile")
     }
 
-    // return res
-
-    return res.status(201).json(
-        new ApiResponse(201, createdUser, "User registerd successfully")
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200, user, "User profile updated successfully")
     )
 })
 
@@ -117,16 +139,22 @@ const userLogin = asyncHandler(async (req, res) => {
         $or: [{username}, {email}]
     })
 
-    if (!user) {
-       throw new ApiError(404, "User does not exist."); 
-    }
+//       return res
+//       .status(200)
+//       .json(
+//        new ApiResponse(200, {}, "User does not exist")
+//       )
 
     // password check
 
     const isPasswordValid = await user.isPasswordCorrect(password)
 
     if (!isPasswordValid) {
-       throw new ApiError(401, "Invalid user credentials"); 
+       return res
+       .status(200)
+       .json(
+        new ApiResponse(200, {}, "Invalid credential, Please provide correct password")
+       )
     }
 
     // generate access and refresh token 
